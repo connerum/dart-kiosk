@@ -59,3 +59,32 @@ KIOSK_API_URL=https://media.safety-linq.com npm start
 The kiosk defaults to `https://media.safety-linq.com` when `KIOSK_API_URL` is not set. Use `KIOSK_API_URL=http://localhost:4173` for local API testing.
 
 The kiosk opens fullscreen and loops through the playlist returned by `/api/playlist`.
+
+### Raspberry Pi autostart
+
+Install the kiosk as a user-level systemd service from the repo on the Pi:
+
+```bash
+cd /path/to/dart-kiosk/kiosk
+chmod +x scripts/install-autostart.sh
+KIOSK_API_URL=https://media.safety-linq.com ./scripts/install-autostart.sh
+```
+
+The installer writes `~/.config/systemd/user/dart-kiosk.service`, runs `npm install`, enables the service, and starts it immediately.
+
+Useful commands:
+
+```bash
+systemctl --user status dart-kiosk.service
+journalctl --user -u dart-kiosk.service -f
+systemctl --user restart dart-kiosk.service
+systemctl --user disable --now dart-kiosk.service
+```
+
+This service starts with the Pi user's graphical session. Make sure the Pi is configured to auto-login to the desktop session if you want the kiosk to appear after a reboot without manual login.
+
+Keyboard controls:
+
+- `Ctrl+W` closes the kiosk.
+- `Ctrl+Q` closes the kiosk.
+- `D` toggles the hidden debug overlay.

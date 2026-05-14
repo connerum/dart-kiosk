@@ -109,6 +109,10 @@ app.whenReady().then(() => {
     app.quit();
   });
 
+  globalShortcut.register('CommandOrControl+W', () => {
+    app.quit();
+  });
+
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
   });

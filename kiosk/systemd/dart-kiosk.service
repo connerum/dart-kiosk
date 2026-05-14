@@ -1,0 +1,18 @@
+[Unit]
+Description=Dart Kiosk fullscreen ad player
+After=graphical-session.target network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=__KIOSK_DIR__
+Environment=KIOSK_API_URL=https://media.safety-linq.com
+Environment=DISPLAY=:0
+Environment=ELECTRON_DISABLE_SECURITY_WARNINGS=true
+ExecStart=/usr/bin/env bash -lc 'npm start'
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=default.target
+
