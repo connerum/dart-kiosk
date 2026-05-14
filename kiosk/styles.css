@@ -54,3 +54,23 @@ body {
   color: #cbd5e1;
   font-size: clamp(18px, 2vw, 28px);
 }
+
+.debug {
+  position: fixed;
+  right: 12px;
+  bottom: 12px;
+  z-index: 10;
+  max-width: min(760px, calc(100vw - 24px));
+  max-height: 34vh;
+  overflow: hidden;
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid rgba(148, 163, 184, 0.36);
+  border-radius: 4px;
+  color: #e5e7eb;
+  background: rgba(2, 6, 23, 0.82);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+  line-height: 1.35;
+  white-space: pre-wrap;
+}

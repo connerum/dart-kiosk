@@ -4,7 +4,13 @@ const path = require('node:path');
 const apiUrl = (process.env.KIOSK_API_URL || 'https://media.safety-linq.com').replace(/\/+$/, '');
 const assetCache = new Map();
 
+function log(message, details = '') {
+  const suffix = details ? ` ${details}` : '';
+  console.log(`[kiosk] ${new Date().toISOString()} ${message}${suffix}`);
+}
+
 async function fetchJson(url) {
+  log('fetch playlist', url);
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 12000);
 
@@ -19,7 +25,9 @@ async function fetchJson(url) {
       throw new Error(`HTTP ${response.status}: ${body.slice(0, 160)}`);
     }
 
-    return response.json();
+    const data = await response.json();
+    log('playlist response', `${Array.isArray(data.ads) ? data.ads.length : 'invalid'} ads`);
+    return data;
   } finally {
     clearTimeout(timeout);
   }
@@ -29,8 +37,12 @@ async function fetchAssetDataUrl(rawUrl) {
   const url = new URL(rawUrl, apiUrl).toString();
   const cached = assetCache.get(url);
 
-  if (cached) return cached;
+  if (cached) {
+    log('asset cache hit', url);
+    return cached;
+  }
 
+  log('fetch asset', url);
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 15000);
 
@@ -50,6 +62,7 @@ async function fetchAssetDataUrl(rawUrl) {
     const dataUrl = `data:${contentType};base64,${buffer.toString('base64')}`;
 
     assetCache.set(url, dataUrl);
+    log('asset response', `${response.status} ${contentType} ${buffer.length} bytes`);
 
     if (assetCache.size > 50) {
       assetCache.delete(assetCache.keys().next().value);
