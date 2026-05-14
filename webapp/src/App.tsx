@@ -82,6 +82,7 @@ export function App() {
   const dragRef = useRef<{ x: number; y: number } | null>(null);
   const [editor, setEditor] = useState<EditorState>(defaultEditor);
   const [sourceFileName, setSourceFileName] = useState('');
+  const [imageVersion, setImageVersion] = useState(0);
   const [playlist, setPlaylist] = useState<Playlist | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -122,6 +123,8 @@ export function App() {
       return;
     }
 
+    if (!image.naturalWidth || !image.naturalHeight) return;
+
     const baseScale = Math.min(CANVAS_WIDTH / image.naturalWidth, CANVAS_HEIGHT / image.naturalHeight);
     const width = image.naturalWidth * baseScale * editor.zoom;
     const height = image.naturalHeight * baseScale * editor.zoom;
@@ -139,7 +142,7 @@ export function App() {
 
   useEffect(() => {
     drawCanvas();
-  }, [drawCanvas]);
+  }, [drawCanvas, imageVersion]);
 
   const loadFile = (file: File) => {
     const url = URL.createObjectURL(file);
@@ -149,6 +152,7 @@ export function App() {
       URL.revokeObjectURL(url);
       imageRef.current = image;
       setSourceFileName(file.name);
+      setImageVersion((current) => current + 1);
       setEditor((current) => ({
         ...current,
         title: current.title || file.name.replace(/\.[^.]+$/, ''),
@@ -175,6 +179,7 @@ export function App() {
 
     setIsSaving(true);
     try {
+      drawCanvas();
       const imageDataUrl = canvas.toDataURL('image/jpeg', 0.92);
 
       const response = await fetch(apiUrl('/api/ads'), {
@@ -192,6 +197,7 @@ export function App() {
       setEditor(defaultEditor);
       setSourceFileName('');
       imageRef.current = null;
+      setImageVersion((current) => current + 1);
       await refreshPlaylist();
     } finally {
       setIsSaving(false);
@@ -253,7 +259,9 @@ export function App() {
                         16:9 Composer
                       </Title>
                       <Text size="sm" c="dimmed">
-                        Drag the preview to position the image.
+                        {sourceFileName
+                          ? 'Image loaded. Drag the preview to position it inside the 16:9 frame.'
+                          : 'Upload an image to begin composing the 16:9 frame.'}
                       </Text>
                     </Box>
                     {sourceFileName ? <Badge variant="light">{sourceFileName}</Badge> : null}
@@ -290,7 +298,9 @@ export function App() {
                   <Dropzone
                     accept={IMAGE_MIME_TYPE}
                     maxFiles={1}
-                    onDrop={(files) => loadFile(files[0])}
+                    onDrop={(files) => {
+                      if (files[0]) loadFile(files[0]);
+                    }}
                     className="dropzone"
                   >
                     <Group justify="center" gap="sm" mih={76}>
@@ -370,7 +380,7 @@ export function App() {
                         setEditor(defaultEditor);
                         setSourceFileName('');
                         imageRef.current = null;
-                        drawCanvas();
+                        setImageVersion((current) => current + 1);
                       }}
                     >
                       Reset
