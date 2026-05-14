@@ -5,5 +5,6 @@ contextBridge.exposeInMainWorld('kioskConfig', {
 });
 
 contextBridge.exposeInMainWorld('kioskApi', {
-  fetchPlaylist: () => ipcRenderer.invoke('playlist:fetch')
+  fetchPlaylist: () => ipcRenderer.invoke('playlist:fetch'),
+  resolveAsset: (url) => ipcRenderer.invoke('asset:resolve', url)
 });

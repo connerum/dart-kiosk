@@ -2,6 +2,7 @@ const { BrowserWindow, app, globalShortcut, ipcMain, Menu } = require('electron'
 const path = require('node:path');
 
 const apiUrl = (process.env.KIOSK_API_URL || 'https://media.safety-linq.com').replace(/\/+$/, '');
+const assetCache = new Map();
 
 async function fetchJson(url) {
   const controller = new AbortController();
@@ -19,6 +20,42 @@ async function fetchJson(url) {
     }
 
     return response.json();
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+async function fetchAssetDataUrl(rawUrl) {
+  const url = new URL(rawUrl, apiUrl).toString();
+  const cached = assetCache.get(url);
+
+  if (cached) return cached;
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 15000);
+
+  try {
+    const response = await fetch(url, {
+      headers: { Accept: 'image/*' },
+      signal: controller.signal
+    });
+
+    if (!response.ok) {
+      const body = await response.text();
+      throw new Error(`Image HTTP ${response.status}: ${body.slice(0, 160)}`);
+    }
+
+    const contentType = response.headers.get('content-type') || 'image/jpeg';
+    const buffer = Buffer.from(await response.arrayBuffer());
+    const dataUrl = `data:${contentType};base64,${buffer.toString('base64')}`;
+
+    assetCache.set(url, dataUrl);
+
+    if (assetCache.size > 50) {
+      assetCache.delete(assetCache.keys().next().value);
+    }
+
+    return dataUrl;
   } finally {
     clearTimeout(timeout);
   }
@@ -47,6 +84,10 @@ app.whenReady().then(() => {
 
   ipcMain.handle('playlist:fetch', async () => {
     return fetchJson(`${apiUrl}/api/playlist`);
+  });
+
+  ipcMain.handle('asset:resolve', async (_event, url) => {
+    return fetchAssetDataUrl(url);
   });
 
   createWindow();

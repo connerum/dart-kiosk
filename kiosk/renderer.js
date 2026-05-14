@@ -6,6 +6,7 @@ let playlist = [];
 let currentIndex = 0;
 let timer = null;
 let playlistSignature = '';
+let imageLoadToken = 0;
 
 function assetUrl(path) {
   return new URL(path, apiBase).toString();
@@ -44,7 +45,23 @@ function scheduleNext(durationSeconds) {
   }, durationSeconds * 1000);
 }
 
-function showCurrentAd() {
+function loadImage(source) {
+  return new Promise((resolve, reject) => {
+    image.onload = () => resolve();
+    image.onerror = () => reject(new Error('Browser could not display the downloaded image.'));
+    image.src = source;
+  });
+}
+
+async function resolveImageSource(url) {
+  if (window.kioskApi?.resolveAsset) {
+    return window.kioskApi.resolveAsset(url);
+  }
+
+  return url;
+}
+
+async function showCurrentAd() {
   if (!playlist.length) {
     setStatus('Dart Kiosk', 'Waiting for ads...');
     return;
@@ -52,13 +69,26 @@ function showCurrentAd() {
 
   const ad = playlist[currentIndex % playlist.length];
   const nextImage = assetUrl(ad.imageUrl);
+  const token = ++imageLoadToken;
 
-  image.onload = () => {
+  try {
+    setStatus('Loading ad', ad.title || 'Loading image...');
+    const imageSource = await resolveImageSource(nextImage);
+
+    if (token !== imageLoadToken) return;
+
+    await loadImage(imageSource);
+
+    if (token !== imageLoadToken) return;
+
     hideStatus();
     image.classList.add('visible');
-  };
-  image.src = nextImage;
-  scheduleNext(ad.durationSeconds || 10);
+    scheduleNext(ad.durationSeconds || 10);
+  } catch (error) {
+    console.error(error);
+    setStatus('Ad image issue', `${ad.title || nextImage} - ${error.message || 'Unknown image error'}`);
+    scheduleNext(ad.durationSeconds || 10);
+  }
 }
 
 async function refreshPlaylist() {
