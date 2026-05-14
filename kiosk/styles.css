@@ -18,12 +18,20 @@ body {
   background: #000;
 }
 
-#ad-image {
+#ad-image,
+#next-ad-image {
   width: 100vw;
   height: 100vh;
   object-fit: contain;
   opacity: 0;
   transition: opacity 240ms ease;
+}
+
+#next-ad-image {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  visibility: hidden;
 }
 
 #ad-image.visible {
@@ -77,4 +85,8 @@ body {
   font-size: 12px;
   line-height: 1.35;
   white-space: pre-wrap;
+}
+
+.debug[hidden] {
+  display: none;
 }

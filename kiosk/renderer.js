@@ -1,4 +1,5 @@
 const image = document.getElementById('ad-image');
+const nextImageElement = document.getElementById('next-ad-image');
 const statusPanel = document.getElementById('status');
 const debugPanel = document.getElementById('debug');
 const apiBase = (window.kioskConfig?.apiUrl || 'https://media.safety-linq.com').replace(/\/+$/, '');
@@ -10,6 +11,15 @@ let playlistSignature = '';
 let imageLoadToken = 0;
 let lastPlaylistUpdatedAt = '';
 let lastFetchAt = '';
+let hasVisibleAd = false;
+
+debugPanel.hidden = true;
+
+window.addEventListener('keydown', (event) => {
+  if (event.key.toLowerCase() === 'd') {
+    debugPanel.hidden = !debugPanel.hidden;
+  }
+});
 
 function setDebug(lines) {
   debugPanel.textContent = [
@@ -36,6 +46,7 @@ function setStatus(title, message) {
   statusPanel.querySelector('h1').textContent = title;
   statusPanel.querySelector('p').textContent = message;
   image.classList.remove('visible');
+  hasVisibleAd = false;
 }
 
 function hideStatus() {
@@ -66,11 +77,11 @@ function scheduleNext(durationSeconds) {
   }, durationSeconds * 1000);
 }
 
-function loadImage(source) {
+function preloadImage(source) {
   return new Promise((resolve, reject) => {
-    image.onload = () => resolve();
-    image.onerror = () => reject(new Error('Browser could not display the downloaded image.'));
-    image.src = source;
+    nextImageElement.onload = () => resolve();
+    nextImageElement.onerror = () => reject(new Error('Browser could not display the downloaded image.'));
+    nextImageElement.src = source;
   });
 }
 
@@ -100,22 +111,30 @@ async function showCurrentAd() {
 
   try {
     setDebug([`Showing index ${currentIndex}`, `Title: ${ad.title || 'Untitled'}`, `Image: ${nextImage}`]);
-    setStatus('Loading ad', ad.title || 'Loading image...');
+    if (!hasVisibleAd) {
+      setStatus('Loading first ad', ad.title || 'Loading image...');
+    }
+
     const imageSource = await resolveImageSource(nextImage);
 
     if (token !== imageLoadToken) return;
 
-    await loadImage(imageSource);
+    await preloadImage(imageSource);
 
     if (token !== imageLoadToken) return;
 
+    image.src = imageSource;
     hideStatus();
     image.classList.add('visible');
+    hasVisibleAd = true;
     setDebug([`Showing index ${currentIndex}`, `Title: ${ad.title || 'Untitled'}`, `Image loaded`]);
     scheduleNext(ad.durationSeconds || 10);
   } catch (error) {
     console.error(error);
-    setStatus('Ad image issue', `${ad.title || nextImage} - ${error.message || 'Unknown image error'}`);
+    if (!hasVisibleAd) {
+      setStatus('Ad image issue', `${ad.title || nextImage} - ${error.message || 'Unknown image error'}`);
+    }
+
     setDebug([`Image failed: ${error.message || 'Unknown image error'}`, `Image: ${nextImage}`]);
     scheduleNext(ad.durationSeconds || 10);
   }
