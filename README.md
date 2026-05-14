@@ -17,7 +17,7 @@ The web interface runs at `http://localhost:5173`. The API runs at `http://local
 
 ## Vercel deployment
 
-Deploy the `webapp` directory as the Vercel project root.
+Deploy the repository root as the Vercel project root. The root `vercel.json` installs and builds the `webapp` directory, serves `webapp/dist`, and exposes root `/api/*` serverless functions that call the webapp API code.
 
 Production URL:
 
@@ -31,7 +31,6 @@ Production URL:
 4. Deploy with:
 
 ```bash
-cd webapp
 vercel
 ```
 
