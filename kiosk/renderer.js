@@ -7,6 +7,8 @@ let currentIndex = 0;
 let timer = null;
 let playlistSignature = '';
 let imageLoadToken = 0;
+let lastPlaylistUpdatedAt = '';
+let lastFetchAt = '';
 
 function assetUrl(path) {
   return new URL(path, apiBase).toString();
@@ -63,7 +65,10 @@ async function resolveImageSource(url) {
 
 async function showCurrentAd() {
   if (!playlist.length) {
-    setStatus('Dart Kiosk', 'Waiting for ads...');
+    setStatus(
+      'Waiting for ads',
+      `Fetched 0 ads from ${apiBase}/api/playlist${lastFetchAt ? ` at ${lastFetchAt}` : ''}`
+    );
     return;
   }
 
@@ -95,6 +100,8 @@ async function refreshPlaylist() {
   try {
     const data = await fetchPlaylist();
     const ads = Array.isArray(data.ads) ? data.ads : [];
+    lastFetchAt = new Date().toLocaleTimeString();
+    lastPlaylistUpdatedAt = data.updatedAt || '';
     const nextSignature = JSON.stringify(
       ads.map((ad) => [ad.id, ad.imageUrl, ad.durationSeconds, ad.title])
     );
@@ -104,6 +111,11 @@ async function refreshPlaylist() {
       playlist = ads;
       currentIndex = 0;
       showCurrentAd();
+    } else if (!ads.length) {
+      setStatus(
+        'Waiting for ads',
+        `Fetched 0 ads from ${apiBase}/api/playlist at ${lastFetchAt}`
+      );
     }
   } catch (error) {
     console.error(error);
