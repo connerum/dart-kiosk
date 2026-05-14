@@ -1,6 +1,6 @@
 const image = document.getElementById('ad-image');
 const statusPanel = document.getElementById('status');
-const apiBase = window.kioskConfig?.apiUrl || 'https://media.safety-linq.com';
+const apiBase = (window.kioskConfig?.apiUrl || 'https://media.safety-linq.com').replace(/\/+$/, '');
 
 let playlist = [];
 let currentIndex = 0;
@@ -23,6 +23,10 @@ function hideStatus() {
 }
 
 async function fetchPlaylist() {
+  if (window.kioskApi?.fetchPlaylist) {
+    return window.kioskApi.fetchPlaylist();
+  }
+
   const response = await fetch(`${apiBase}/api/playlist`, { cache: 'no-store' });
 
   if (!response.ok) {
@@ -74,7 +78,7 @@ async function refreshPlaylist() {
   } catch (error) {
     console.error(error);
     if (!playlist.length) {
-      setStatus('Connection issue', `Could not reach ${apiBase}`);
+      setStatus('Connection issue', `${apiBase} - ${error.message || 'Unknown network error'}`);
     }
   }
 }

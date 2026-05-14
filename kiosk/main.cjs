@@ -1,7 +1,28 @@
-const { BrowserWindow, app, globalShortcut, Menu } = require('electron');
+const { BrowserWindow, app, globalShortcut, ipcMain, Menu } = require('electron');
 const path = require('node:path');
 
-const apiUrl = process.env.KIOSK_API_URL || 'http://localhost:4173';
+const apiUrl = (process.env.KIOSK_API_URL || 'https://media.safety-linq.com').replace(/\/+$/, '');
+
+async function fetchJson(url) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 12000);
+
+  try {
+    const response = await fetch(url, {
+      headers: { Accept: 'application/json' },
+      signal: controller.signal
+    });
+
+    if (!response.ok) {
+      const body = await response.text();
+      throw new Error(`HTTP ${response.status}: ${body.slice(0, 160)}`);
+    }
+
+    return response.json();
+  } finally {
+    clearTimeout(timeout);
+  }
+}
 
 function createWindow() {
   Menu.setApplicationMenu(null);
@@ -23,6 +44,11 @@ function createWindow() {
 
 app.whenReady().then(() => {
   process.env.KIOSK_API_URL = apiUrl;
+
+  ipcMain.handle('playlist:fetch', async () => {
+    return fetchJson(`${apiUrl}/api/playlist`);
+  });
+
   createWindow();
 
   globalShortcut.register('CommandOrControl+Q', () => {
@@ -37,4 +63,3 @@ app.whenReady().then(() => {
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit();
 });
-
