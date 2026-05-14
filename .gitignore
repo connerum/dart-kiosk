@@ -1,0 +1,43 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+webapp/dist/
+kiosk/dist/
+out/
+build/
+
+# Local runtime storage
+webapp/storage/
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+
+# Vercel local project metadata
+.vercel/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# TypeScript and tool caches
+*.tsbuildinfo
+.vite/
+.cache/
+
+# OS and editor files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Temporary files
+tmp/
+temp/
+*.tmp

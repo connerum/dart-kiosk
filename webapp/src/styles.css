@@ -1,0 +1,97 @@
+:root {
+  color-scheme: light;
+  background: #f6f8fb;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background:
+    linear-gradient(180deg, rgba(20, 184, 166, 0.08), rgba(20, 184, 166, 0) 310px),
+    #f6f8fb;
+}
+
+.app-header {
+  border-bottom: 1px solid #e5e7eb;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(14px);
+}
+
+.editor-panel,
+.playlist-panel {
+  background: rgba(255, 255, 255, 0.94);
+}
+
+.ad-canvas {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: #111827;
+  cursor: grab;
+  touch-action: none;
+}
+
+.ad-canvas:active {
+  cursor: grabbing;
+}
+
+.dropzone {
+  border-style: solid;
+  background: #f9fafb;
+}
+
+.playlist-panel {
+  min-height: 640px;
+}
+
+.playlist-scroll {
+  height: 598px;
+  padding-right: 6px;
+}
+
+.playlist-thumb {
+  width: 168px;
+  min-width: 168px;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: 4px;
+  border: 1px solid #e5e7eb;
+  background: #f3f4f6;
+}
+
+.empty-playlist {
+  min-height: 360px;
+  display: grid;
+  place-items: center;
+  background: #f9fafb;
+}
+
+@media (max-width: 640px) {
+  .app-header {
+    height: auto;
+    min-height: 92px;
+    padding: 8px 0;
+  }
+
+  .playlist-panel {
+    min-height: 500px;
+  }
+
+  .playlist-scroll {
+    height: auto;
+    max-height: 560px;
+  }
+
+  .playlist-thumb {
+    width: 120px;
+    min-width: 120px;
+  }
+}
+

@@ -1,0 +1,33 @@
+{
+  "name": "dart-kiosk-webapp",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently \"npm:dev:api\" \"npm:dev:ui\"",
+    "dev:api": "node server/index.js",
+    "dev:ui": "vite --host 0.0.0.0",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview --host 0.0.0.0",
+    "start": "NODE_ENV=production node server/index.js"
+  },
+  "dependencies": {
+    "@mantine/core": "^8.3.8",
+    "@mantine/dropzone": "^8.3.8",
+    "@mantine/hooks": "^8.3.8",
+    "@tabler/icons-react": "^3.35.0",
+    "@vercel/blob": "^2.3.3",
+    "@vitejs/plugin-react": "^5.1.1",
+    "concurrently": "^9.2.1",
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "react": "^19.2.1",
+    "react-dom": "^19.2.1",
+    "vite": "^7.2.7"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3",
+    "typescript": "^5.9.3"
+  }
+}

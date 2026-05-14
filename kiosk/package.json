@@ -1,0 +1,14 @@
+{
+  "name": "dart-kiosk-player",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Fullscreen Raspberry Pi ad kiosk player.",
+  "main": "main.cjs",
+  "scripts": {
+    "start": "electron ."
+  },
+  "dependencies": {
+    "electron": "^39.2.6"
+  }
+}
+
