@@ -42,6 +42,10 @@ body {
   background: #020617;
 }
 
+.status[hidden] {
+  display: none;
+}
+
 .status h1 {
   margin: 0;
   font-size: clamp(36px, 5vw, 76px);
